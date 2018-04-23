@@ -1,0 +1,17 @@
+#!/bin/bash
+nmap -p 25 --open $1 | grep Nmap | cut -d " " -f5 | grep -v addresses | grep -v http > smtphosts.txt
+cd network-scan
+for host in $(cat ../smtphosts.txt); 
+do 
+	if [ ! -d $host ]
+		then 
+		mkdir $host
+	fi
+	cd $host
+	echo "Scanning host $host"
+	touch smtp-enum
+	smtp-user-enum -M VRFY -U ../../users.txt -t $host > smtp-enum
+	echo "Done"
+	cd .. 
+done
+

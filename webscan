@@ -1,0 +1,17 @@
+#!/bin/bash
+nmap -p 80,443,8080 Pn --open $1 | grep Nmap | cut -d " " -f5 | grep -v addresses | grep -v http > webhosts.txt 
+cd network-scan
+for host in $(cat ../webhosts.txt); 
+do 
+if [ ! -d $host ]
+	then
+		mkdir $host
+fi	
+cd $host
+echo "Scanning Host $host"
+touch web-enum
+nmap -p 80,443,8080 -sV -sT -Pn  $host > web-enum
+echo "Done"
+cd .. 
+done
+

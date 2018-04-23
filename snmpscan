@@ -1,0 +1,14 @@
+#!/bin/bash
+touch snmphosts.txt
+onesixtyone -c community -i hosts.txt | cut -d " " -f1 | grep -v "Scanning" > snmphosts.txt
+cd network-scan
+for host in $(cat ../snmphosts.txt); 
+do 
+cd $host
+echo "Scanning host $host"
+touch snmp-enum
+snmpwalk -c public -v1 $host > snmp-enum
+echo "Done"
+cd .. 
+done
+

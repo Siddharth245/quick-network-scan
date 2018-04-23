@@ -1,0 +1,28 @@
+#!/bin/bash
+nmap -v -p 139,445 --open -Pn $1 | grep Nmap | cut -d " " -f5 | grep -v addresses | grep -v http > smbhosts.txt
+cd network-scan
+for host in $(cat ../smbhosts.txt); 
+do 
+	if [ ! -d $host ]
+		then
+		mkdir $host
+	fi
+	cd $host
+	touch samba-enum	
+	echo "$host under samba scan"
+	enum4linux $host 2> /dev/null >> samba-enum
+	#Code to create a users list from enum4linux output
+	touch users
+	enum4linux -U $host 2> /dev/null | grep user: | cut -d "[" -f2 | cut -d "]" -f1 >> users
+	if [ -s users ]
+		then	
+		touch logins
+		acccheck -t $host -U users -P ../../top-25 | cut -d " " -f 14,16 | cut -d "'" -f 2,4 >> logins
+		if [ -f cracked ];
+			then
+			rm cracked
+		fi
+	fi
+	echo "Done"
+	cd ..
+done

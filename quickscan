@@ -1,0 +1,41 @@
+#!/bin/bash
+
+if [ -z $1 ];then
+echo "[*] Please specify the network"
+echo "[*] Usage: $0 <ip-address/subnet>"
+exit 0
+fi
+echo "Scanning the Network"
+nmap -sn $1 | grep Nmap | cut -d " " -f5 | grep -v addresses | grep -v http > hosts.txt
+uphosts=$(wc -l hosts.txt | cut -d " " -f1)
+echo "$uphosts hosts are up"
+mkdir network-scan
+cd network-scan
+echo "Scanning each host"
+for host in $(cat ../hosts.txt); 
+do 
+mkdir $host
+cd $host
+echo "$host under Syn Scan (Top 1000 ports)"
+touch open-ports
+nmap -Pn $host > open-ports
+cd .. 
+done
+cd ..
+echo "SNMP Scan in progress"
+./snmpscan
+snmphosts=$(wc -l snmphosts.txt | cut -d " " -f1)
+echo "$snmphosts snmphosts are up"
+echo "SMTP Scan in progress"
+./smtpscan $1
+smtphosts=$(wc -l smtphosts.txt | cut -d " " -f1)
+echo "$smtphosts smtphosts are up"
+echo "Samba Scan in progres"
+./smbscan $1
+smbhosts=$(wc -l smbhosts.txt | cut -d " " -f1)
+echo "$smbhosts smbhosts are up"
+echo "Web Scan in progress"
+./webscan $1
+webhosts=$(wc -l webhosts.txt | cut -d " " -f1)
+echo "$webhosts webhosts are up"
+echo "Done! You can find the network information in the Network-Scan directory"  
